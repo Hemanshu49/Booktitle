@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Search</title>
+    <style>
+        #results {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: start;
+            margin-top: 20px;
+        }
+
+        #bookdiv {
+            background-color: white;
+            padding: 5px;
+            margin: 10px;
+            box-shadow: 0px 0px 40px 10px rgb(219, 219, 219);
+            flex: 1 1 300px;
+            border-radius: 10px;
+        }
+
+        #searchButton {
+            border-radius: 15px;
+            background-color: rgb(30, 100, 212);
+            height: 40px;
+            width: fit-content;
+            padding-left: 20px;
+            padding-right: 20px;
+            color: white;
+            border: 0;
+        }
+        #searchInput {
+            height: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <Center>
+        <h1>Book Search</h1>
+        <input type="text" id="searchInput" placeholder="Enter book title">
+        <button id="searchButton">Search</button>
+    </Center>
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('searchButton').addEventListener('click', function() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const xhr = new XMLHttpRequest(); 
+            
+            const url = `/backend.php?title=${encodeURIComponent(searchTerm)}`;
+            xhr.open('GET', url, true);
+
+            xhr.onload = function() {
+                if (this.status >= 200 && this.status < 300) {
+                    const data = JSON.parse(this.responseText); 
+                    displayResults(data);
+                } else {
+                    console.error('Request failed. Returned status of ' + this.status);
+                }
+            };
+
+            xhr.onerror = function() {
+                console.error('Error making the request.');
+            };
+    
+            xhr.send();
+        });
+    
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            if (data.items) {
+                data.items.forEach(item => {
+                    const bookTitle = item.volumeInfo.title;
+                    const bookAuthors = item.volumeInfo.authors ? item.volumeInfo.authors.join(', ') : 'Unknown Author';
+                    const bookInfo = `<div id="bookdiv">
+                                        <h2>${bookTitle}</h2>
+                                        <p><strong>Authors:</strong> ${bookAuthors}</p>
+                                      </div>`;
+                    resultsDiv.innerHTML += bookInfo;
+                });
+            } else {
+                resultsDiv.innerHTML = '<p>No results found</p>';
+            }
+        }
+    </script>
+    
+</body>
+
+</html>
